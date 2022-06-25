@@ -1,0 +1,70 @@
+version: "3.9"
+services:
+  analyst_python:
+    container_name: analyst_python
+    build:
+      context: ./
+      dockerfile: docker/analyst/python/Dockerfile
+    image: analyst_python
+    volumes:
+     - ./code:/code
+    depends_on:
+      - executor_celery
+      - scheduler_redis
+      - scheduler_rabbitmq
+  executor_flower:
+    container_name: executor_flower
+    build:
+      context: ./
+      dockerfile: docker/executor/flower/Dockerfile
+    image: executor_flower
+    ports:
+     - 9000:8888
+    volumes:
+     - ./code:/code
+    depends_on:
+      - executor_celery
+      - scheduler_redis
+      - scheduler_rabbitmq
+  executor_celery:
+    build:
+      context: ./
+      dockerfile: docker/executor/celery/Dockerfile
+    container_name: executor_celery
+    # deploy:
+    #   mode: replicated
+    #   replicas: 1
+    image: executor_celery
+    volumes:
+      - ./code:/code
+    depends_on:
+      - scheduler_redis
+      - scheduler_rabbitmq
+  scheduler_redis:
+    container_name: scheduler_redis
+    build:
+      context: ./
+      dockerfile: docker/scheduler/redis/Dockerfile
+    image: scheduler_redis
+  scheduler_rabbitmq:
+    container_name: scheduler_rabbitmq
+    build:
+      context: ./
+      dockerfile: docker/scheduler/rabbitmq/Dockerfile
+    image: scheduler_rabbitmq
+    depends_on:
+      - scheduler_redis
+# custom
+  jupyter_lab:
+      container_name: jupyter_lab
+      build:
+        context: ./
+        dockerfile: docker/jupyter_lab/Dockerfile
+      image: jupyter_lab
+      ports:
+      - 8888:8888
+      volumes:
+      - ./notebooks:/notebooks
+networks:
+  default:
+    name: dcl_network
