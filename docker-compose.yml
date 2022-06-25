@@ -7,7 +7,7 @@ services:
       dockerfile: docker/analyst/python/Dockerfile
     image: analyst_python
     volumes:
-     - ./code:/code
+     - ./src:/src
     depends_on:
       - executor_celery
       - scheduler_redis
@@ -21,7 +21,7 @@ services:
     ports:
      - 9000:8888
     volumes:
-     - ./code:/code
+     - ./src:/src
     depends_on:
       - executor_celery
       - scheduler_redis
@@ -36,7 +36,7 @@ services:
     #   replicas: 1
     image: executor_celery
     volumes:
-      - ./code:/code
+      - ./src:/src
     depends_on:
       - scheduler_redis
       - scheduler_rabbitmq
